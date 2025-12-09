@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * StockMovementItem entity - items in a stock movement transaction
  */
 @Entity
-@Table(name = "stock_movement_items", schema = "click_user")
+@Table(name = "stock_movement_items", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

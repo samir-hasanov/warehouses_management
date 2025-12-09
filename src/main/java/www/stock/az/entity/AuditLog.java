@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * AuditLog entity for tracking all operations and changes
  */
 @Entity
-@Table(name = "audit_logs", schema = "click_user",
+@Table(name = "audit_logs", schema = "management",
         indexes = {
                 @Index(name = "idx_audit_entity_type", columnList = "entity_type,entity_id"),
                 @Index(name = "idx_audit_created_at", columnList = "created_at"),

@@ -13,7 +13,7 @@ import java.util.List;
  * Category entity - Product categories
  */
 @Entity
-@Table(name = "categories", schema = "click_user")
+@Table(name = "categories", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

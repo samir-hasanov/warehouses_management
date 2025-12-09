@@ -13,7 +13,7 @@ import java.util.List;
  * Brand entity - Product brands
  */
 @Entity
-@Table(name = "brands", schema = "click_user")
+@Table(name = "brands", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

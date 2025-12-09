@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * Stock entity - represents stock quantity in a specific warehouse
  */
 @Entity
-@Table(name = "stocks", schema = "click_user", uniqueConstraints = {
+@Table(name = "stocks", schema = "management", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"product_id", "warehouse_id"})
 })
 @Data
