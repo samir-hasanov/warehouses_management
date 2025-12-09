@@ -41,9 +41,15 @@ public class StockMovementServiceImpl implements StockMovementService {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Anbar tapılmadı: " + request.getWarehouseId()));
         
-        // Barcode ilə məhsulu tap
-        Product product = barcodeRepository.findProductByBarcode(request.getProductBarcode())
-                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + request.getProductBarcode()));
+        // Barcode ilə məhsulu tap - barcode-u təmizlə
+        String cleanedBarcode = request.getProductBarcode() != null 
+            ? request.getProductBarcode().replaceAll("\\s+", "").trim() 
+            : "";
+        if (cleanedBarcode.isEmpty()) {
+            throw new RuntimeException("Məhsul barcode boşdur");
+        }
+        Product product = barcodeRepository.findProductByBarcode(cleanedBarcode)
+                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + cleanedBarcode));
         
         // Stock Movement yarat
         StockMovement movement = new StockMovement();

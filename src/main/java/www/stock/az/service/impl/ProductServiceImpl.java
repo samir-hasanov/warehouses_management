@@ -28,8 +28,13 @@ public class ProductServiceImpl implements ProductService {
     private final StockRepository stockRepository;
 
     public ProductResponse findByBarcode(String barcode) {
-        Product product = barcodeRepository.findProductByBarcode(barcode)
-                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + barcode));
+        // Barcode-u təmizlə: boşluqları sil və trim et
+        String cleanedBarcode = barcode != null ? barcode.replaceAll("\\s+", "").trim() : "";
+        if (cleanedBarcode.isEmpty()) {
+            throw new RuntimeException("Barcode boşdur");
+        }
+        Product product = barcodeRepository.findProductByBarcode(cleanedBarcode)
+                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + cleanedBarcode));
         return mapToResponse(product);
     }
 
@@ -78,9 +83,15 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        // Main barcode
+        // Main barcode - təmizlə və saxla
         Barcode mainBarcode = new Barcode();
-        mainBarcode.setBarcode(request.getMainBarcode());
+        String cleanedMainBarcode = request.getMainBarcode() != null 
+            ? request.getMainBarcode().replaceAll("\\s+", "").trim() 
+            : "";
+        if (cleanedMainBarcode.isEmpty()) {
+            throw new RuntimeException("Əsas barcode boşdur");
+        }
+        mainBarcode.setBarcode(cleanedMainBarcode);
         mainBarcode.setBarcodeType(null);
         mainBarcode.setIsPrimary(true);
         mainBarcode.setProduct(savedProduct);
