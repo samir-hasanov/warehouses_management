@@ -5,7 +5,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
-        default_schema: click_user
+        default_schema: management
   datasource:
     url: "jdbc:postgresql://localhost:5432/warehouses_management"
     username: postgres

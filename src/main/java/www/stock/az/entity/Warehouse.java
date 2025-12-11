@@ -13,7 +13,7 @@ import java.util.List;
  * Warehouse entity for multi-warehouse stock management
  */
 @Entity
-@Table(name = "warehouses", schema = "click_user")
+@Table(name = "warehouses", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

@@ -14,7 +14,7 @@ import java.util.List;
  * Product entity - core product information
  */
 @Entity
-@Table(name = "products", schema = "click_user")
+@Table(name = "products", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

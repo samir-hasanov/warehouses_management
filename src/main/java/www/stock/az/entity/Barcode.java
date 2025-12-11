@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * Barcode entity for product barcode support
  */
 @Entity
-@Table(name = "barcodes", schema = "click_user", uniqueConstraints = {
+@Table(name = "barcodes", schema = "management", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"barcode", "product_id"})
 })
 @Data

@@ -16,7 +16,7 @@ import java.util.List;
  * StockMovement entity - represents Stock-IN, Stock-OUT, and Transfer operations
  */
 @Entity
-@Table(name = "stock_movements", schema = "click_user")
+@Table(name = "stock_movements", schema = "management")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
