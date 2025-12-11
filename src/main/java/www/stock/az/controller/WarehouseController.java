@@ -1,11 +1,14 @@
 package www.stock.az.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import www.stock.az.dto.request.WarehouseCreateRequest;
+import www.stock.az.dto.request.WarehouseUpdateRequest;
 import www.stock.az.dto.response.WarehouseResponse;
 import www.stock.az.service.WarehouseService;
-import www.stock.az.service.impl.WarehouseServiceImpl;
 
 import java.util.List;
 
@@ -33,5 +36,25 @@ public class WarehouseController {
     public ResponseEntity<WarehouseResponse> getWarehouseByCode(@PathVariable String code) {
         WarehouseResponse warehouse = warehouseService.findByCode(code);
         return ResponseEntity.ok(warehouse);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createWarehouse(@Valid @RequestBody WarehouseCreateRequest request) {
+        WarehouseResponse response = warehouseService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateWarehouse(
+            @PathVariable Long id,
+            @Valid @RequestBody WarehouseUpdateRequest request) {
+        WarehouseResponse response = warehouseService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteWarehouse(@PathVariable Long id) {
+        warehouseService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
