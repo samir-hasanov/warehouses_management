@@ -26,5 +26,11 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     @Query("SELECT sm FROM StockMovement sm WHERE sm.sourceWarehouse.id = :warehouseId")
     List<StockMovement> findBySourceWarehouse(@Param("warehouseId") Long warehouseId);
     
+    @Query("SELECT DISTINCT sm FROM StockMovement sm LEFT JOIN FETCH sm.items i LEFT JOIN FETCH sm.sourceWarehouse LEFT JOIN FETCH sm.targetWarehouse LEFT JOIN FETCH i.product")
+    List<StockMovement> findAllWithDetails();
+    
+    @Query("SELECT DISTINCT sm FROM StockMovement sm LEFT JOIN FETCH sm.items i LEFT JOIN FETCH sm.sourceWarehouse LEFT JOIN FETCH sm.targetWarehouse LEFT JOIN FETCH i.product WHERE sm.movementType = :type")
+    List<StockMovement> findByMovementTypeWithDetails(@Param("type") MovementType type);
+    
     boolean existsByMovementNumber(String movementNumber);
 }

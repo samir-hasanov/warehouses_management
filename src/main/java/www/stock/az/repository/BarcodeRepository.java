@@ -17,6 +17,10 @@ public interface BarcodeRepository extends JpaRepository<Barcode, Long> {
     @Query("SELECT b.product FROM Barcode b WHERE b.barcode = :barcode AND b.product.isActive = true")
     Optional<Product> findProductByBarcode(@Param("barcode") String barcode);
     
+    // Barcode-u təmizləyərək axtar (boşluqları, tire və digər simvolları sil)
+    @Query("SELECT b.product FROM Barcode b WHERE REPLACE(REPLACE(REPLACE(REPLACE(b.barcode, ' ', ''), '-', ''), '_', ''), '.', '') = :cleanedBarcode AND b.product.isActive = true")
+    Optional<Product> findProductByCleanedBarcode(@Param("cleanedBarcode") String cleanedBarcode);
+    
     @Query("SELECT b FROM Barcode b WHERE b.barcode = :barcode AND b.isPrimary = true")
     Optional<Barcode> findPrimaryBarcode(@Param("barcode") String barcode);
     

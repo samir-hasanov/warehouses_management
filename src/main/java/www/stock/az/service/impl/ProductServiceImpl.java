@@ -13,6 +13,7 @@ import www.stock.az.service.ProductService;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,8 +29,32 @@ public class ProductServiceImpl implements ProductService {
     private final StockRepository stockRepository;
 
     public ProductResponse findByBarcode(String barcode) {
-        Product product = barcodeRepository.findProductByBarcode(barcode)
-                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + barcode));
+        if (barcode == null || barcode.trim().isEmpty()) {
+            throw new RuntimeException("Barcode boşdur");
+        }
+        
+        // Barcode-u təmizlə: boşluqları, tire və digər simvolları sil
+        String cleanedBarcode = barcode.replaceAll("[\\s\\-_\\.]", "").trim();
+        
+        if (cleanedBarcode.isEmpty()) {
+            throw new RuntimeException("Barcode boşdur");
+        }
+        
+        // Əvvəlcə təmizlənmiş barcode ilə axtar (bazada təmizlənmiş formatda saxlanıla bilər)
+        Optional<Product> productOpt = barcodeRepository.findProductByBarcode(cleanedBarcode);
+        
+        // Əgər tapılmadısa, təmizlənmiş barcode ilə bazada təmizləyərək axtar
+        if (productOpt.isEmpty()) {
+            productOpt = barcodeRepository.findProductByCleanedBarcode(cleanedBarcode);
+        }
+        
+        // Əgər hələ də tapılmadısa, orijinal barcode ilə də yoxla (bəlkə bazada boşluqlarla saxlanılıb)
+        if (productOpt.isEmpty() && !cleanedBarcode.equals(barcode.trim())) {
+            productOpt = barcodeRepository.findProductByBarcode(barcode.trim());
+        }
+        
+        Product product = productOpt
+                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + barcode + " (təmizlənmiş: " + cleanedBarcode + ")"));
         return mapToResponse(product);
     }
 
@@ -78,20 +103,25 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        // Main barcode
-        Barcode mainBarcode = new Barcode();
-        mainBarcode.setBarcode(request.getMainBarcode());
-        mainBarcode.setBarcodeType(null);
-        mainBarcode.setIsPrimary(true);
-        mainBarcode.setProduct(savedProduct);
-        barcodeRepository.save(mainBarcode);
+        // Main barcode - təmizlə və saxla
+        if (request.getMainBarcode() != null && !request.getMainBarcode().trim().isEmpty()) {
+            String cleanedMainBarcode = request.getMainBarcode().replaceAll("[\\s\\-_\\.]", "").trim();
+            Barcode mainBarcode = new Barcode();
+            mainBarcode.setBarcode(cleanedMainBarcode);
+            mainBarcode.setBarcodeType(null);
+            mainBarcode.setIsPrimary(true);
+            mainBarcode.setProduct(savedProduct);
+            barcodeRepository.save(mainBarcode);
+        }
 
-        // Additional barcodes
+        // Additional barcodes - təmizlə və saxla
         if (request.getAdditionalBarcodes() != null) {
             for (String code : request.getAdditionalBarcodes()) {
                 if (code == null || code.isBlank()) continue;
+                String cleanedCode = code.replaceAll("[\\s\\-_\\.]", "").trim();
+                if (cleanedCode.isEmpty()) continue;
                 Barcode b = new Barcode();
-                b.setBarcode(code.trim());
+                b.setBarcode(cleanedCode);
                 b.setBarcodeType(null);
                 b.setIsPrimary(false);
                 b.setProduct(savedProduct);
