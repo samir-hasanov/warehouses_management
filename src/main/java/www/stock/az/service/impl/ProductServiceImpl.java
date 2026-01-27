@@ -1,11 +1,14 @@
 package www.stock.az.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import www.stock.az.dto.request.ProductCreateRequest;
 import www.stock.az.dto.response.BrandResponse;
 import www.stock.az.dto.response.CategoryResponse;
+import www.stock.az.dto.response.PageResponse;
 import www.stock.az.dto.response.ProductResponse;
 import www.stock.az.entity.*;
 import www.stock.az.repository.*;
@@ -32,27 +35,27 @@ public class ProductServiceImpl implements ProductService {
         if (barcode == null || barcode.trim().isEmpty()) {
             throw new RuntimeException("Barcode boşdur");
         }
-        
+
         // Barcode-u təmizlə: boşluqları, tire və digər simvolları sil
         String cleanedBarcode = barcode.replaceAll("[\\s\\-_\\.]", "").trim();
-        
+
         if (cleanedBarcode.isEmpty()) {
             throw new RuntimeException("Barcode boşdur");
         }
-        
+
         // Əvvəlcə təmizlənmiş barcode ilə axtar (bazada təmizlənmiş formatda saxlanıla bilər)
         Optional<Product> productOpt = barcodeRepository.findProductByBarcode(cleanedBarcode);
-        
+
         // Əgər tapılmadısa, təmizlənmiş barcode ilə bazada təmizləyərək axtar
         if (productOpt.isEmpty()) {
             productOpt = barcodeRepository.findProductByCleanedBarcode(cleanedBarcode);
         }
-        
+
         // Əgər hələ də tapılmadısa, orijinal barcode ilə də yoxla (bəlkə bazada boşluqlarla saxlanılıb)
         if (productOpt.isEmpty() && !cleanedBarcode.equals(barcode.trim())) {
             productOpt = barcodeRepository.findProductByBarcode(barcode.trim());
         }
-        
+
         Product product = productOpt
                 .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + barcode + " (təmizlənmiş: " + cleanedBarcode + ")"));
         return mapToResponse(product);
@@ -70,11 +73,18 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(product);
     }
 
-    public List<ProductResponse> findAllActive() {
-        return productRepository.findByIsActiveTrue()
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public PageResponse<ProductResponse> findAllActive(Pageable pageable) {
+
+        Page<Product> product = productRepository.findByIsActiveTrue(pageable);
+        Page<ProductResponse> responses = product.map(this::mapToResponse);
+        return new PageResponse<>(
+                responses.getContent(),
+                responses.getNumber(),
+                responses.getSize(),
+                responses.getTotalElements(),
+                responses.getTotalPages()
+        );
+
     }
 
     /**

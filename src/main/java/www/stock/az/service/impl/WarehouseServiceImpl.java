@@ -1,38 +1,43 @@
 package www.stock.az.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import www.stock.az.dto.request.WarehouseCreateRequest;
 import www.stock.az.dto.request.WarehouseUpdateRequest;
+import www.stock.az.dto.response.PageResponse;
 import www.stock.az.dto.response.WarehouseResponse;
 import www.stock.az.entity.Warehouse;
 import www.stock.az.repository.WarehouseRepository;
 import www.stock.az.service.WarehouseService;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class WarehouseServiceImpl implements WarehouseService {
-    
+
     private final WarehouseRepository warehouseRepository;
-    
+
     public WarehouseResponse findByCode(String code) {
         Warehouse warehouse = warehouseRepository.findByCodeAndIsActiveTrue(code)
                 .orElseThrow(() -> new RuntimeException("Anbar tapılmadı: " + code));
         return mapToResponse(warehouse);
     }
-    
+
     public WarehouseResponse findById(Long id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Anbar tapılmadı: " + id));
         return mapToResponse(warehouse);
     }
-    
+
     public List<WarehouseResponse> findAllActive() {
+
         return warehouseRepository.findByIsActiveTrue()
                 .stream()
                 .map(this::mapToResponse)
@@ -102,7 +107,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setIsActive(false);
         warehouseRepository.save(warehouse);
     }
-    
+
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
         WarehouseResponse response = new WarehouseResponse();
         response.setId(warehouse.getId());
@@ -119,4 +124,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         response.setUpdatedAt(warehouse.getUpdatedAt());
         return response;
     }
+
+
+   
 }
+

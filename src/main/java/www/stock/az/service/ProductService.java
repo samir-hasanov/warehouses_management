@@ -1,12 +1,15 @@
 package www.stock.az.service;
 
+import org.springframework.data.domain.Pageable;
 import www.stock.az.dto.request.ProductCreateRequest;
+import www.stock.az.dto.response.PageResponse;
 import www.stock.az.dto.response.ProductResponse;
 
 import java.util.List;
 
 public interface ProductService {
-    List<ProductResponse> findAllActive();
+
+PageResponse<ProductResponse> findAllActive(Pageable pageable);
 
     ProductResponse findById(Long id);
 
