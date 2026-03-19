@@ -48,13 +48,15 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public BrandResponse create(BrandCreateRequest request) {
-        // Check if code already exists
-        if (brandRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Bu kod ilə brand artıq mövcuddur: " + request.getCode());
+        String code = (request.getCode() != null && !request.getCode().isBlank())
+                ? request.getCode().trim().toUpperCase()
+                : ("BR-" + System.currentTimeMillis());
+        if (brandRepository.existsByCode(code)) {
+            throw new RuntimeException("Bu kod ilə brand artıq mövcuddur: " + code);
         }
 
         Brand brand = new Brand();
-        brand.setCode(request.getCode());
+        brand.setCode(code);
         brand.setName(request.getName());
         brand.setDescription(request.getDescription());
         brand.setCountry(request.getCountry());

@@ -1,15 +1,16 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/warehouses_management
+    username: postgres
+    password: 12345
+
   jpa:
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         default_schema: management
-  datasource:
-    url: "jdbc:postgresql://localhost:5432/warehouses_management"
-    username: postgres
-    password: 12345
+    open-in-view: false
 
 server:
   port: 8087

@@ -48,9 +48,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse create(CategoryCreateRequest request) {
-        // Check if code already exists
-        if (categoryRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Bu kod ilə kateqoriya artıq mövcuddur: " + request.getCode());
+        String code = (request.getCode() != null && !request.getCode().isBlank())
+                ? request.getCode().trim().toUpperCase()
+                : ("CAT-" + System.currentTimeMillis());
+        if (categoryRepository.existsByCode(code)) {
+            throw new RuntimeException("Bu kod ilə kateqoriya artıq mövcuddur: " + code);
         }
 
         // Validate parent category if provided
@@ -60,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category category = new Category();
-        category.setCode(request.getCode());
+        category.setCode(code);
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         category.setParentId(request.getParentId());

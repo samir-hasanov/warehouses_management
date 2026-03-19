@@ -62,12 +62,16 @@ public class StockMovementServiceImpl implements StockMovementService {
         }
         
         // Əgər hələ də tapılmadısa, orijinal barcode ilə də yoxla
-        if (productOpt.isEmpty() && !cleanedBarcode.equals(request.getProductBarcode().trim())) {
+        if (productOpt.isEmpty() && request.getProductBarcode() != null && !cleanedBarcode.equals(request.getProductBarcode().trim())) {
             productOpt = barcodeRepository.findProductByBarcode(request.getProductBarcode().trim());
+        }
+        // USB skanner / Symbol: barcode cədvəlində yoxdursa, məhsul kodu (Product.code) ilə də yoxla
+        if (productOpt.isEmpty()) {
+            productOpt = productRepository.findByCodeAndIsActiveTrue(cleanedBarcode);
         }
         
         Product product = productOpt
-                .orElseThrow(() -> new RuntimeException("Barcode ilə məhsul tapılmadı: " + request.getProductBarcode()));
+                .orElseThrow(() -> new RuntimeException("Barcode/kod ilə məhsul tapılmadı: " + request.getProductBarcode()));
         
         // Stock Movement yarat
         StockMovement movement = new StockMovement();

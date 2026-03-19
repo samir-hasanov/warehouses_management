@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BrandCreateRequest {
 
-    @NotBlank(message = "Brand kodu mütləqdir")
     @Size(max = 50, message = "Brand kodu maksimum 50 simvol ola bilər")
     private String code;
 

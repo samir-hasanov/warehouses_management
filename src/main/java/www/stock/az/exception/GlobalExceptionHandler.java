@@ -7,8 +7,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -16,48 +14,86 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> errors = new HashMap<>();
-        Map<String, String> fieldErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .collect(Collectors.toMap(
-                        error -> error.getField(),
-                        error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Validation failed",
-                        (existing, replacement) -> existing
-                ));
-        
-        errors.put("message", "Validation xətası");
-        errors.put("errors", fieldErrors);
-        
-        log.warn("Validation error: {}", fieldErrors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        var errors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(e -> e.getField(), e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid", (a, b) -> a));
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message("Validation failed")
+                .code("VALIDATION_ERROR")
+                .errors(errors)
+                .build();
+        log.warn("Validation error: {}", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message(ex.getMessage())
+                .code("NOT_FOUND")
+                .build();
+        log.warn("Not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex) {
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message(ex.getMessage())
+                .code("CONFLICT")
+                .build();
+        log.warn("Conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(BadRequestException ex) {
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message(ex.getMessage())
+                .code("BAD_REQUEST")
+                .build();
+        log.warn("Bad request: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Invalid argument";
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message(msg)
+                .code("BAD_REQUEST")
+                .build();
+        log.warn("IllegalArgument: {}", msg);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        Map<String, Object> error = new HashMap<>();
-        String message = ex.getMessage() != null ? ex.getMessage() : "Xəta baş verdi";
-        error.put("message", message);
-        
-        log.error("Runtime exception: {}", message, ex);
-        
-        // Determine status code based on message
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+    public ResponseEntity<ApiErrorResponse> handleRuntime(RuntimeException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "An error occurred";
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String code = "ERROR";
         if (message.contains("tapılmadı") || message.contains("not found")) {
             status = HttpStatus.NOT_FOUND;
+            code = "NOT_FOUND";
+        } else if (message.contains("already exists") || message.contains("artıq mövcuddur")) {
+            status = HttpStatus.CONFLICT;
+            code = "CONFLICT";
         }
-        
-        return ResponseEntity.status(status).body(error);
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message(message)
+                .code(code)
+                .build();
+        log.error("Runtime exception: {}", message, ex);
+        return ResponseEntity.status(status).body(body);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("message", "Gözlənilməz xəta baş verdi");
-        
+    public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex) {
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .message("An unexpected error occurred")
+                .code("INTERNAL_ERROR")
+                .build();
         log.error("Unexpected exception", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }
-

@@ -11,9 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WarehouseCreateRequest {
 
-    @NotBlank(message = "Anbar kodu mütləqdir")
     @Size(max = 50, message = "Anbar kodu maksimum 50 simvol ola bilər")
-    private String code;
+    private String code;  // Boş buraxılsa avtomatik yaradılır
 
     @NotBlank(message = "Anbar adı mütləqdir")
     @Size(max = 200, message = "Anbar adı maksimum 200 simvol ola bilər")

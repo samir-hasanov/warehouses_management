@@ -46,13 +46,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseResponse create(WarehouseCreateRequest request) {
-        // Check if code already exists
-        if (warehouseRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Bu kod ilə anbar artıq mövcuddur: " + request.getCode());
+        String code = (request.getCode() != null && !request.getCode().isBlank())
+                ? request.getCode().trim()
+                : ("WH-" + System.currentTimeMillis());
+        if (warehouseRepository.existsByCode(code)) {
+            throw new RuntimeException("Bu kod ilə anbar artıq mövcuddur: " + code);
         }
 
         Warehouse warehouse = new Warehouse();
-        warehouse.setCode(request.getCode());
+        warehouse.setCode(code);
         warehouse.setName(request.getName());
         warehouse.setDescription(request.getDescription());
         warehouse.setAddress(request.getAddress());

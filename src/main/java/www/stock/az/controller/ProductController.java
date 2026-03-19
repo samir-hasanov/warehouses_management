@@ -27,7 +27,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<PageResponse<ProductResponse>> getAllActiveProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "4") int size) {
+            @RequestParam(defaultValue = "10") int size) {
 
         PageRequest pageable = PageRequest.of(page, size);
 

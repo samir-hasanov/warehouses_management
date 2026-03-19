@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryCreateRequest {
 
-    @NotBlank(message = "Kateqoriya kodu mütləqdir")
     @Size(max = 50, message = "Kateqoriya kodu maksimum 50 simvol ola bilər")
     private String code;
 
